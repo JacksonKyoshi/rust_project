@@ -29,20 +29,25 @@ pub fn u128<R: Read>(rd: &mut R) -> anyhow::Result<u128> {
 }
 
 fn uuid<R: Read>(rd: &mut R) -> anyhow::Result<Uuid> {
-  let mut stringficelle: [u8; 16]  =  [0;16] ;
+  let mut list: [u8; 16]  =  [0;16] ;
   let _ = rd.read_u8()?;
-  rd.read_exact(&mut stringficelle)?;
-  Ok(Uuid::from_bytes(stringficelle))
+  rd.read_exact(&mut list)?;
+  Ok(Uuid::from_bytes(list))
 }
 
 // hint: reuse uuid
+/* Version de max
+  let mut result: ServerId = Default::default();
+  result.0 = uuid(rd)?;
+  Ok(result)
+ */
 pub fn clientid<R: Read>(rd: &mut R) -> anyhow::Result<ClientId> {
-  todo!()
+  Ok(ClientId(uuid(rd)?))
 }
 
 // hint: reuse uuid
 pub fn serverid<R: Read>(rd: &mut R) -> anyhow::Result<ServerId> {
-  todo!()
+  Ok(ServerId(uuid(rd)?))
 }
 
 pub fn string<R: Read>(rd: &mut R) -> anyhow::Result<String> {
