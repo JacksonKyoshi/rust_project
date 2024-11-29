@@ -14,21 +14,20 @@ use crate::messages::ServerReply::Error;
 // this function is used to encode all the "sizes" values that will appear after that
 pub fn u128<W>(w: &mut W, m: u128) -> std::io::Result<()>
 where
-  W: Write,
+    W: Write,
 {
   if m < 251 {
     w.write_u8(m as u8)
   }
-  else if m < 2**16 {
+  else if m < 2_u128.pow(16){
     w.write_u8(251u8)?;
     w.write_u16::<LittleEndian>(m as u16)
   }
-      
-  else if m < 2**32 {
+  else if m < 2_u128.pow(32){
     w.write_u8(252u8)?;
     w.write_u32::<LittleEndian>(m as u32)
   }
-  else if m < 2**64 {
+  else if m < 2_u128.pow(64){
     w.write_u8(253u8)?;
     w.write_u64::<LittleEndian>(m as u64)
   }
@@ -43,9 +42,10 @@ where
 */
 fn uuid<W>(w: &mut W, m: &Uuid) -> std::io::Result<()>
 where
-  W: Write,
+    W: Write,
 {
-  todo!()
+  w.write_u8(16u8)?;
+  w.write_all(m.as_bytes())
 }
 
 // reuse uuid
@@ -53,6 +53,7 @@ pub fn clientid<W>(w: &mut W, m: &ClientId) -> std::io::Result<()>
 where
   W: Write,
 {
+  //Ok(Uuid(m))
   todo!()
 }
 

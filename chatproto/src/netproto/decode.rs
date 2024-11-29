@@ -29,7 +29,10 @@ pub fn u128<R: Read>(rd: &mut R) -> anyhow::Result<u128> {
 }
 
 fn uuid<R: Read>(rd: &mut R) -> anyhow::Result<Uuid> {
-  todo!()
+  let mut stringficelle: [u8; 16]  =  [0;16] ;
+  let _ = rd.read_u8()?;
+  rd.read_exact(&mut stringficelle)?;
+  Ok(Uuid::from_bytes(stringficelle))
 }
 
 // hint: reuse uuid
@@ -76,7 +79,7 @@ pub fn client_query<R: Read>(rd: &mut R) -> anyhow::Result<ClientQuery> {
 
 pub fn sequence<X, R: Read, DEC>(rd: &mut R, d: DEC) -> anyhow::Result<Sequence<X>>
 where
-  DEC: FnOnce(&mut R) -> anyhow::Result<X>,
+    DEC: FnOnce(&mut R) -> anyhow::Result<X>,
 {
   todo!()
 }
