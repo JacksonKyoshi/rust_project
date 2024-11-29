@@ -1,12 +1,14 @@
 use std::{collections::HashMap, io::Write};
-
+use std::io::ErrorKind;
 use byteorder::{LittleEndian, WriteBytesExt};
+use futures::future::err;
 use uuid::Uuid;
 
 use crate::messages::{
   AuthMessage, ClientId, ClientMessage, ClientPollReply, ClientQuery, ClientReply, Sequence,
   ServerId, ServerMessage,
 };
+use crate::messages::ServerReply::Error;
 
 // look at the README.md for guidance on writing this function
 // this function is used to encode all the "sizes" values that will appear after that
@@ -16,8 +18,22 @@ where
 {
   if m < 251 {
     w.write_u8(m as u8)
-  } else {
+  }
+  else if m < 2**16 {
+    w.write_u8(251u8)?;
+    w.write_u16::<LittleEndian>(m as u16)
+  }
+  else if m < 2**32 {
+    w.write_u8(252u8)?;
     w.write_u32::<LittleEndian>(m as u32)
+  }
+  else if m < 2**64 {
+    w.write_u8(253u8)?;
+    w.write_u64::<LittleEndian>(m as u64)
+  }
+  else{
+    w.write_u8(254u8)?;
+    w.write_u128::<LittleEndian>(m)
   }
 }
 
