@@ -17,7 +17,7 @@ where
   if m < 251 {
     w.write_u8(m as u8)
   } else {
-    todo!()
+    w.write_u32::<LittleEndian>(m as u32)
   }
 }
 
