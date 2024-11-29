@@ -1,5 +1,5 @@
 use std::{collections::HashMap, io::Read};
-
+use std::ptr::write;
 use byteorder::{LittleEndian, ReadBytesExt};
 use uuid::Uuid;
 
@@ -10,7 +10,22 @@ use crate::messages::{
 
 // look at the README.md for guidance on writing this function
 pub fn u128<R: Read>(rd: &mut R) -> anyhow::Result<u128> {
-  todo!()
+  let firstOctet = rd.read_u8()?;
+  if firstOctet == 251 {
+    Ok(rd.read_u16::<LittleEndian>()? as u128)
+  }
+  else if firstOctet == 252 {
+    Ok(rd.read_u32::<LittleEndian>()? as u128)
+  }
+  else if firstOctet == 253 {
+    Ok(rd.read_u64::<LittleEndian>()? as u128)
+  }
+  else if firstOctet == 254 {
+    Ok(rd.read_u128::<LittleEndian>()?)
+  }
+  else {
+    Ok(10 as u128)
+  }
 }
 
 fn uuid<R: Read>(rd: &mut R) -> anyhow::Result<Uuid> {

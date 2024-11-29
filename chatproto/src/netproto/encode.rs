@@ -19,15 +19,15 @@ where
   if m < 251 {
     w.write_u8(m as u8)
   }
-  else if m < 2**16 {
+  else if m < 2_u128.pow(16){
     w.write_u8(251u8)?;
     w.write_u16::<LittleEndian>(m as u16)
   }
-  else if m < 2**32 {
+  else if m < 2_u128.pow(32){
     w.write_u8(252u8)?;
     w.write_u32::<LittleEndian>(m as u32)
   }
-  else if m < 2**64 {
+  else if m < 2_u128.pow(64){
     w.write_u8(253u8)?;
     w.write_u64::<LittleEndian>(m as u64)
   }
