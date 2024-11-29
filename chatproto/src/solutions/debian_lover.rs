@@ -21,7 +21,14 @@ use crate::messages::{Outgoing, ServerMessage, ServerReply};
 // this will include things like delivered messages, clients last seen sequence number, etc.
 pub struct Server<C: SpamChecker> {
   checker: C,
-  // add things here
+  server_id: ServerId,
+  client_list: RwLock<HashMap<ClientId, ClientInfo>>
+}
+
+pub struct ClientInfo{
+  src_ip: IpAddr,
+  name: String,
+  sequence_id: u128,
 }
 
 #[async_trait]
@@ -29,7 +36,7 @@ impl<C: SpamChecker + Send + Sync> MessageServer<C> for Server<C> {
   const GROUP_NAME: &'static str = "SERVET-BOUDOU Isaure, SOLA Maxime";
 
   fn new(checker: C, id: ServerId) -> Self {
-    todo!()
+    Server { checker, server_id: id, client_list: RwLock::new(HashMap::new()) }
   }
 
   // note: you need to roll a Uuid, and then convert it into a ClientId
@@ -39,7 +46,11 @@ impl<C: SpamChecker + Send + Sync> MessageServer<C> for Server<C> {
   // for spam checking, you will need to run both checks in parallel, and take a decision as soon as
   // each checks return
   async fn register_local_client(&self, src_ip: IpAddr, name: String) -> Option<ClientId> {
-    todo!()
+    let new_client_info = ClientInfo { src_ip, name, sequence_id: 0 };
+    let id_client = ClientId(Uuid::new_v4());
+    self.client_list.write().await.insert(id_client, new_client_info);
+    Some(id_client)
+    //un jour il y aura none
   }
 
   /*
@@ -49,7 +60,19 @@ impl<C: SpamChecker + Send + Sync> MessageServer<C> for Server<C> {
     &self,
     sequence: Sequence<A>,
   ) -> Result<A, ClientError> {
-    todo!()
+    match self.client_list.write().await.get_mut(&sequence.src) {
+      None => {
+        Err(ClientError::UnknownClient)
+      }
+      Some(client) => {
+        if client.sequence_id < sequence.seqid {
+          client.sequence_id = sequence.seqid;
+          Ok(sequence.content)
+        } else {
+          Err(ClientError::InternalError)
+        }
+      }
+    }
   }
 
   /* Here client messages are handled.
