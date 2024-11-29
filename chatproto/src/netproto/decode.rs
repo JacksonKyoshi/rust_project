@@ -10,21 +10,21 @@ use crate::messages::{
 
 // look at the README.md for guidance on writing this function
 pub fn u128<R: Read>(rd: &mut R) -> anyhow::Result<u128> {
-  let firstOctet = rd.read_u8()?;
-  if firstOctet == 251 {
+  let first_octet = rd.read_u8()?;
+  if first_octet == 251 {
     Ok(rd.read_u16::<LittleEndian>()? as u128)
   }
-  else if firstOctet == 252 {
+  else if first_octet == 252 {
     Ok(rd.read_u32::<LittleEndian>()? as u128)
   }
-  else if firstOctet == 253 {
+  else if first_octet == 253 {
     Ok(rd.read_u64::<LittleEndian>()? as u128)
   }
-  else if firstOctet == 254 {
+  else if first_octet == 254 {
     Ok(rd.read_u128::<LittleEndian>()?)
   }
   else {
-    Ok(10 as u128)
+    Ok(first_octet as u128)
   }
 }
 
